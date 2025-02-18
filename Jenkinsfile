@@ -29,10 +29,10 @@ pipeline {
           // Log in to Docker Hub and push the image
           docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
             // Tag the image with your Docker Hub username and repository name
-            sh "docker tag my-java-app:${env.BUILD_ID} /my-java-app:${env.BUILD_ID}"
+            sh "docker tag my-java-app:${env.BUILD_ID} anushiyavasanth/my-java-app:${env.BUILD_ID}"
 
             // Push the image to Docker Hub
-            sh "docker push my-java-app:${env.BUILD_ID}"
+            sh "docker push anushiyavasanth/my-java-app:${env.BUILD_ID}"
           }
 
           // Stop and remove the existing container (if it exists)
@@ -40,7 +40,7 @@ pipeline {
           sh 'docker rm my-java-container || true'
 
           // Run the new container using the image from Docker Hub
-          sh "docker run -d -p 8080:8080 --name my-java-container my-java-app:${env.BUILD_ID}"
+          sh "docker run -d -p 8080:8080 --name my-java-container anushiyavasanth/ my-java-app:${env.BUILD_ID}"
         }
       }
     }
