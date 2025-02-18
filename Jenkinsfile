@@ -40,7 +40,7 @@ pipeline {
           sh 'docker rm my-java-container || true'
 
           // Run the new container using the image from Docker Hub
-          sh "docker run -d -p 8080:8080 --name my-java-container anushiyavasanth/ my-java-app:${env.BUILD_ID}"
+          sh "docker run -d -p 8080:8080 --name my-java-container anushiyavasanth/my-java-app:${env.BUILD_ID}"
         }
       }
     }
