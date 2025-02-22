@@ -1,0 +1,70 @@
+---
+- name: Deploy Docker image and container
+  hosts: docker_hosts
+  become: yes
+  vars:
+    docker_hub_username: "anushiyavasanth"  # Replace with your Docker Hub username
+    docker_hub_password: "dckr_pat_4h4TCOPWoFmMuLZpbfXxlBPwkSc"  # Replace with your Docker Hub password or token
+    docker_hub_repository: "anushiyavasanth/regapp"  # Replace with your Docker Hub repository  
+  tasks:
+    - name: Ensure /opt/docker directory exists
+      file:
+        path: /opt/docker
+        state: directory
+        owner: ansibleusr
+        group: ansibleusr
+        mode: '0755'
+
+    - name: Copy .war file to Docker host
+      copy:
+        src: ../files/my-app-1.0-SNAPSHOT.war
+        dest: /opt/docker/my-app-1.0-SNAPSHOT.war
+
+    - name: Copy Dockerfile to Docker host
+      copy:
+        src: ../files/Dockerfile
+        dest: /opt/docker/Dockerfile
+
+    - name: Install urllib3 (compatible version)
+      pip:
+        name: "urllib3<2.0"
+        state: present
+        executable: /usr/bin/pip3
+
+    - name: Install Docker SDK for Python
+      pip:
+        name: docker
+        state: present
+        executable: /usr/bin/pip3
+
+    - name: Log in to Docker Hub
+      docker_login:
+        username: "{{ docker_hub_username }}"
+        password: "{{ docker_hub_password }}"
+
+    - name: Build Docker image
+      docker_image:
+        name: regapp
+        tag: v1
+        source: build
+        build:
+          path: /opt/docker
+
+    - name: Tag Docker image for Docker Hub
+      docker_image:
+        name: regapp
+        repository: "{{ docker_hub_repository }}"
+        tag: v1
+
+    - name: Push Docker image to Docker Hub
+      docker_image:
+        name: "{{ docker_hub_repository }}:v1"
+        push: yes
+
+    - name: Create Docker container
+      docker_container:
+        name: regapp-container
+        image: "{{ docker_hub_repository }}:v1"
+        state: started
+        ports:
+          - "8080:8080"
